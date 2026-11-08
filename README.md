@@ -11,6 +11,10 @@ npm run dev
 
 Open http://localhost:3000. `npm run check` exercises report handling, dispatch, road routing, responsibility metrics and AI input/output validation. `npm run build` builds the Next.js application; `npm start` serves the production build. A Node.js server is required for local AI intake; this version is not a static export.
 
+## Mapbox configuration
+
+The map basemap and road routing require a public Mapbox token. Set `NEXT_PUBLIC_MAPBOX_TOKEN` in `.env.local` for local development. In Vercel, add the same variable to the Production and Preview environments, then redeploy so the new token is included in the client bundle. `.env.example` shows the expected variable name.
+
 ## Road routing
 
 Road mode is the default. Click **Run dispatch** to fetch Mapbox driving-time and distance matrices, assign the highest-priority jobs, and draw actual road geometry with estimated arrival offsets.
@@ -19,7 +23,7 @@ Road mode is the default. Click **Run dispatch** to fetch Mapbox driving-time an
 - Matrix requests are split into blocks of at most 24 coordinates, within the driving API's 25-coordinate limit. Results are cached in browser memory for five minutes. There is no straight-line fallback for unreachable pairs.
 - Every crew's route includes a return to its depot. Shift capacity includes travel and repair estimates. Final Directions travel times are checked again; work is removed with an explicit capacity reason if the final route would exceed the shift.
 - Kilometers and route geometry in Road mode come from Mapbox Directions. Arrival offsets include preceding travel and repair time. The driving profile does not include live traffic, and ETAs remain estimates.
-- Mapbox Matrix and Directions calls use the public token in `lib/config.js` and normal account API usage. Authorization, timeout and rate-limit errors are shown. No estimated plan is substituted silently.
+- Mapbox Matrix and Directions calls use `NEXT_PUBLIC_MAPBOX_TOKEN` and normal account API usage. Authorization, timeout and rate-limit errors are shown. No estimated plan is substituted silently.
 - **Estimated** mode remains an explicit option. It uses Haversine tours and distance × 1.35 at 20 km/h. Those lines and times are labeled schematic estimates.
 
 ## Responsibility
