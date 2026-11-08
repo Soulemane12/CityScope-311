@@ -39,7 +39,7 @@ export async function GET(request) {
   }
 
   if (response.status === 429) {
-    return errorResponse('NYC Open Data is rate-limiting requests. Try again shortly.', 429, response.headers.get('retry-after') || '10');
+    return errorResponse('NYC Open Data is rate-limiting report queries. Add a Socrata app token as NYC_OPEN_DATA_APP_TOKEN in Vercel, then redeploy.', 429, response.headers.get('retry-after') || '10');
   }
   if (!response.ok) return errorResponse(`NYC Open Data returned ${response.status}.`, 502);
 
