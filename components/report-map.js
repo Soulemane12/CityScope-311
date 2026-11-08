@@ -28,11 +28,15 @@ function date(raw, full = false) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', ...(full ? { year: 'numeric', hour: 'numeric', minute: '2-digit' } : {}), timeZone: 'UTC' }).format(value) + (full ? ' ET' : '');
 }
 async function readJson(url, signal) {
+  const proxyUrl = new URL('/api/reports', window.location.origin);
+  proxyUrl.searchParams.set('source', url);
   for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.any([signal, AbortSignal.timeout(45000)]) });
+    const response = await fetch(proxyUrl, { cache: 'no-store', signal: AbortSignal.any([signal, AbortSignal.timeout(45000)]) });
     if (response.ok) return response.json();
     if (attempt === 0 && (response.status === 429 || response.status >= 500)) {
-      await new Promise(resolve => setTimeout(resolve, 700));
+      const retryAfter = Number(response.headers.get('retry-after'));
+      const delay = Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 10000) : 2000;
+      await new Promise(resolve => setTimeout(resolve, delay));
       continue;
     }
     throw new Error(response.status === 429 ? 'NYC Open Data is busy. Try again shortly.' : `NYC Open Data returned ${response.status}.`);
